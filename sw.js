@@ -1,11 +1,15 @@
 // sw.js
-const CACHE_NAME = 'invoice-app-v1.2';
+const CACHE_NAME = 'invoice-app-v2.0';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './script.js',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-192.png',
+  './icon-maskable-512.png'
 ];
 
 // Install event

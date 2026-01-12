@@ -77,6 +77,9 @@
                     <input type="text" id="invoiceNumber" placeholder="Invoice Number" class="input">
                     <input type="date" id="invoiceDate" class="input">
                 </div>
+                <div class="form-row">
+                    <textarea id="invoiceObservations" placeholder="Observations (optional - will appear below column headers in PDF)" class="input textarea" rows="2"></textarea>
+                </div>
             </div>
 
             <!-- Items -->
@@ -219,7 +222,12 @@
     <button onclick="installPWA()" class="btn success" id="installBtn" style="display: none;">
         📱 Install App
     </button>
-    <p id="pwaStatus">PWA installation not available</p>
+    <p id="pwaStatus">Checking PWA status...</p>
+    <div id="pwaDebug" style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 12px; display: none;">
+        <strong>Debug Info:</strong>
+        <ul id="pwaDebugList"></ul>
+    </div>
+    <button onclick="togglePwaDebug()" class="btn secondary" style="margin-top: 10px;">Show Debug Info</button>
 </div>
             <div class="card">
                 <h3>Business Information</h3>
@@ -273,17 +281,104 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
 <script>
+    // PWA Debug info
+    const pwaDebugInfo = [];
+    let swRegistered = false;
+    let manifestLoaded = false;
+    
+    function addDebugInfo(message, isError = false) {
+        pwaDebugInfo.push({ message, isError });
+        console.log(isError ? '❌' : '✅', message);
+    }
+    
+    function updateDebugDisplay() {
+        const list = document.getElementById('pwaDebugList');
+        if (list) {
+            list.innerHTML = pwaDebugInfo.map(info => 
+                `<li style="color: ${info.isError ? 'red' : 'green'}">${info.isError ? '❌' : '✅'} ${info.message}</li>`
+            ).join('');
+        }
+    }
+    
+    function togglePwaDebug() {
+        const debug = document.getElementById('pwaDebug');
+        debug.style.display = debug.style.display === 'none' ? 'block' : 'none';
+        updateDebugDisplay();
+    }
+    
+    function updatePwaStatus() {
+        const status = document.getElementById('pwaStatus');
+        const installBtn = document.getElementById('installBtn');
+        
+        // Check protocol
+        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        const isFileProtocol = location.protocol === 'file:';
+        
+        if (isFileProtocol) {
+            status.innerHTML = '⚠️ <strong>Cannot install from local file.</strong><br>PWAs require HTTPS. Please:<br>1. Upload to GitHub Pages, or<br>2. Use a local server (see instructions below)';
+            status.style.color = '#856404';
+            status.style.background = '#fff3cd';
+            status.style.padding = '10px';
+            status.style.borderRadius = '5px';
+            addDebugInfo('Running from file:// protocol - PWA not supported', true);
+        } else if (!isSecure) {
+            status.innerHTML = '⚠️ <strong>HTTPS required.</strong><br>PWAs only work on HTTPS or localhost.';
+            status.style.color = 'red';
+            addDebugInfo('Not running on HTTPS or localhost', true);
+        } else if (deferredPrompt) {
+            status.innerHTML = '✅ <strong>Ready to install!</strong> Click the button above.';
+            status.style.color = 'green';
+            installBtn.style.display = 'inline-block';
+        } else if (window.matchMedia('(display-mode: standalone)').matches) {
+            status.innerHTML = '✅ <strong>Already installed!</strong> Running as PWA.';
+            status.style.color = 'green';
+        } else if (swRegistered) {
+            status.innerHTML = '⏳ <strong>Service Worker ready.</strong> Waiting for browser install prompt...<br><small>Try refreshing the page or check if already installed.</small>';
+            status.style.color = '#0056b3';
+        } else {
+            status.innerHTML = '⏳ Loading...';
+        }
+    }
+
+    // Check manifest
+    fetch('./manifest.json')
+        .then(response => {
+            if (response.ok) {
+                addDebugInfo('Manifest loaded successfully');
+                manifestLoaded = true;
+                return response.json();
+            } else {
+                throw new Error('Manifest not found');
+            }
+        })
+        .then(manifest => {
+            addDebugInfo(`App name: ${manifest.name}`);
+            addDebugInfo(`Icons defined: ${manifest.icons?.length || 0}`);
+        })
+        .catch(error => {
+            addDebugInfo('Manifest error: ' + error.message, true);
+        });
+
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
+        addDebugInfo('Service Worker supported');
+        
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('./sw.js')
                 .then(function(registration) {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    addDebugInfo('Service Worker registered');
+                    swRegistered = true;
+                    updatePwaStatus();
                 })
                 .catch(function(error) {
                     console.log('ServiceWorker registration failed: ', error);
+                    addDebugInfo('Service Worker failed: ' + error.message, true);
+                    updatePwaStatus();
                 });
         });
+    } else {
+        addDebugInfo('Service Worker not supported in this browser', true);
     }
 
     // Show install prompt for PWA
@@ -295,8 +390,9 @@
         e.preventDefault();
         // Stash the event so it can be triggered later
         deferredPrompt = e;
+        addDebugInfo('Install prompt available!');
         
-        // Create and show install button
+        // Create and show floating install button
         installButton.textContent = '📱 Install App';
         installButton.className = 'btn success';
         installButton.style.position = 'fixed';
@@ -306,6 +402,9 @@
         installButton.onclick = installPWA;
         
         document.body.appendChild(installButton);
+        
+        // Update status in settings
+        updatePwaStatus();
     });
 
     function installPWA() {
@@ -316,26 +415,37 @@
             deferredPrompt.userChoice.then((choiceResult) => {
                 if (choiceResult.outcome === 'accepted') {
                     console.log('User accepted the install prompt');
+                    addDebugInfo('User accepted installation');
                 } else {
                     console.log('User dismissed the install prompt');
+                    addDebugInfo('User dismissed installation');
                 }
                 deferredPrompt = null;
                 // Remove the install button
                 installButton.remove();
+                updatePwaStatus();
             });
+        } else {
+            alert('Installation not available. Make sure you are:\n1. Using HTTPS (like GitHub Pages)\n2. Using a supported browser (Chrome, Edge, etc.)');
         }
     }
 
     // Detect if the app is launched as PWA
     window.addEventListener('appinstalled', (evt) => {
         console.log('App was installed as PWA');
+        addDebugInfo('App was installed!');
         installButton.remove();
+        updatePwaStatus();
     });
 
     // Check if running as PWA
     if (window.matchMedia('(display-mode: standalone)').matches) {
         console.log('Running as PWA');
+        addDebugInfo('Running in standalone mode (PWA)');
     }
+    
+    // Initial status check
+    setTimeout(updatePwaStatus, 1000);
 </script>
 </body>
 </html>

@@ -470,7 +470,30 @@ function generatePDF() {
     doc.text('PRICE', pageWidth - margin - 70, y + 5);
     doc.text('AMOUNT', pageWidth - margin - 30, y + 5);
 
-    y += 15;
+    y += 10;
+
+    // OBSERVATIONS (if any) - displayed below column headers
+    if (invoiceData.observations && invoiceData.observations.trim()) {
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 128);
+        doc.setFont(undefined, 'italic');
+        
+        // Split observations into multiple lines if needed
+        const observationLines = doc.splitTextToSize(invoiceData.observations, pageWidth - 2 * margin - 10);
+        const obsHeight = observationLines.length * 4 + 4;
+        
+        // Draw background for observations
+        doc.setFillColor(240, 248, 255);
+        doc.rect(margin, y, pageWidth - 2 * margin, obsHeight, 'F');
+        
+        // Draw observations text
+        doc.text(observationLines, margin + 5, y + 4);
+        
+        y += obsHeight + 3;
+        doc.setFont(undefined, 'normal');
+    } else {
+        y += 5;
+    }
 
     // ITEMS
     doc.setFontSize(8);
@@ -629,6 +652,7 @@ function getInvoiceData() {
         workLocationCity: document.getElementById('workLocationCity').value,
         workLocationState: document.getElementById('workLocationState').value,
         workLocationZip: document.getElementById('workLocationZip').value,
+        observations: document.getElementById('invoiceObservations').value,
         items: [...currentItems],
         subtotal: subtotal,
         taxRate: taxRate,
@@ -968,6 +992,7 @@ function editInvoice(invoiceId) {
     document.getElementById('workLocationCity').value = invoice.workLocationCity || '';
     document.getElementById('workLocationState').value = invoice.workLocationState || '';
     document.getElementById('workLocationZip').value = invoice.workLocationZip || '';
+    document.getElementById('invoiceObservations').value = invoice.observations || '';
     document.getElementById('taxRate').value = invoice.taxRate || 0;
 
     // Load items with new IDs to avoid conflicts
@@ -1053,6 +1078,7 @@ function clearInvoiceForm() {
     document.getElementById('workLocationCity').value = '';
     document.getElementById('workLocationState').value = '';
     document.getElementById('workLocationZip').value = '';
+    document.getElementById('invoiceObservations').value = '';
     document.getElementById('itemDescription').value = '';
     document.getElementById('itemQuantity').value = '1';
     document.getElementById('itemPrice').value = '';
@@ -1226,7 +1252,30 @@ function downloadInvoice(invoiceId) {
     doc.text('PRICE', pageWidth - margin - 70, y + 5);
     doc.text('AMOUNT', pageWidth - margin - 30, y + 5);
 
-    y += 15;
+    y += 10;
+
+    // OBSERVATIONS (if any) - displayed below column headers
+    if (invoice.observations && invoice.observations.trim()) {
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 128);
+        doc.setFont(undefined, 'italic');
+        
+        // Split observations into multiple lines if needed
+        const observationLines = doc.splitTextToSize(invoice.observations, pageWidth - 2 * margin - 10);
+        const obsHeight = observationLines.length * 4 + 4;
+        
+        // Draw background for observations
+        doc.setFillColor(240, 248, 255);
+        doc.rect(margin, y, pageWidth - 2 * margin, obsHeight, 'F');
+        
+        // Draw observations text
+        doc.text(observationLines, margin + 5, y + 4);
+        
+        y += obsHeight + 3;
+        doc.setFont(undefined, 'normal');
+    } else {
+        y += 5;
+    }
 
     // ITEMS
     doc.setFontSize(8);
@@ -1543,7 +1592,30 @@ function shareInvoiceFromHistory(invoiceId) {
     doc.text('PRICE', pageWidth - margin - 70, y + 5);
     doc.text('AMOUNT', pageWidth - margin - 30, y + 5);
 
-    y += 15;
+    y += 10;
+
+    // OBSERVATIONS (if any) - displayed below column headers
+    if (invoice.observations && invoice.observations.trim()) {
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 128);
+        doc.setFont(undefined, 'italic');
+        
+        // Split observations into multiple lines if needed
+        const observationLines = doc.splitTextToSize(invoice.observations, pageWidth - 2 * margin - 10);
+        const obsHeight = observationLines.length * 4 + 4;
+        
+        // Draw background for observations
+        doc.setFillColor(240, 248, 255);
+        doc.rect(margin, y, pageWidth - 2 * margin, obsHeight, 'F');
+        
+        // Draw observations text
+        doc.text(observationLines, margin + 5, y + 4);
+        
+        y += obsHeight + 3;
+        doc.setFont(undefined, 'normal');
+    } else {
+        y += 5;
+    }
 
     // ITEMS
     doc.setFontSize(8);

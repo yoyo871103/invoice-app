@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        h1 { color: #007ACC; }
+        button { background: #007ACC; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; margin: 10px 5px; font-size: 16px; }
+        button:hover { background: #005a99; }
+        .preview { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        canvas { border: 1px solid #ddd; }
+        .success { color: green; font-weight: bold; }
+        .instructions { background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 PWA Icon Generator</h1>
+        <p>Click the buttons below to generate and download the required icons for your PWA.</p>
+        
+        <div class="preview">
+            <div>
+                <h3>192x192</h3>
+                <canvas id="canvas192" width="192" height="192"></canvas>
+            </div>
+            <div>
+                <h3>512x512</h3>
+                <canvas id="canvas512" width="512" height="512"></canvas>
+            </div>
+        </div>
+
+        <button onclick="downloadAll()">📥 Download All Icons</button>
+        
+        <div id="status"></div>
+
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Click "Download All Icons" button</li>
+                <li>Save the 4 PNG files in the same folder as your index.html</li>
+                <li>Make sure the files are named exactly:
+                    <ul>
+                        <li>icon-192.png</li>
+                        <li>icon-512.png</li>
+                        <li>icon-maskable-192.png</li>
+                        <li>icon-maskable-512.png</li>
+                    </ul>
+                </li>
+                <li>Upload all files to your GitHub repository</li>
+                <li>Clear browser cache and try installing again</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(canvas, size, maskable = false) {
+            const ctx = canvas.getContext('2d');
+            const padding = maskable ? size * 0.1 : 0;
+            const innerSize = size - (padding * 2);
+            
+            // Background
+            ctx.fillStyle = '#007ACC';
+            if (maskable) {
+                ctx.fillRect(0, 0, size, size);
+            } else {
+                ctx.beginPath();
+                ctx.roundRect(0, 0, size, size, size * 0.125);
+                ctx.fill();
+            }
+            
+            // White inner rectangle
+            const whiteSize = innerSize * 0.7;
+            const whiteOffset = padding + (innerSize - whiteSize) / 2;
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.roundRect(whiteOffset, whiteOffset, whiteSize, whiteSize, whiteSize * 0.08);
+            ctx.fill();
+            
+            // Blue center rectangle
+            const blueSize = whiteSize * 0.75;
+            const blueOffset = whiteOffset + (whiteSize - blueSize) / 2;
+            ctx.fillStyle = '#007ACC';
+            ctx.beginPath();
+            ctx.roundRect(blueOffset, blueOffset, blueSize, blueSize, blueSize * 0.05);
+            ctx.fill();
+            
+            // Snowflake symbol (simple)
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${blueSize * 0.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('❄', blueOffset + blueSize/2, blueOffset + blueSize/2 + blueSize * 0.05);
+        }
+
+        // Draw previews
+        drawIcon(document.getElementById('canvas192'), 192);
+        drawIcon(document.getElementById('canvas512'), 512);
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            const status = document.getElementById('status');
+            
+            // Create temporary canvases for all icons
+            const icons = [
+                { size: 192, name: 'icon-192.png', maskable: false },
+                { size: 512, name: 'icon-512.png', maskable: false },
+                { size: 192, name: 'icon-maskable-192.png', maskable: true },
+                { size: 512, name: 'icon-maskable-512.png', maskable: true }
+            ];
+
+            icons.forEach((icon, index) => {
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = icon.size;
+                    canvas.height = icon.size;
+                    drawIcon(canvas, icon.size, icon.maskable);
+                    downloadCanvas(canvas, icon.name);
+                    
+                    if (index === icons.length - 1) {
+                        status.innerHTML = '<p class="success">✅ All 4 icons downloaded! Move them to your PWA folder.</p>';
+                    }
+                }, index * 500);
+            });
+        }
+    </script>
+</body>
+</html>
+
