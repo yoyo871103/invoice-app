@@ -1,0 +1,27 @@
+{
+    "name": "HVAC Invoice Generator",
+    "short_name": "InvoiceApp",
+    "description": "Professional HVAC invoice generator with PDF export",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#007ACC",
+    "theme_color": "#007ACC",
+    "orientation": "any",
+    "scope": "./",
+    "lang": "en",
+    "categories": ["business", "productivity", "utilities"],
+    "icons": [
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMwMDdBQ0MiLz4KPHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjEzMiIgcng9IjEwIiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSI0NSIgeT0iNDUiIHdpZHRoPSIxMDIiIGhlaWdodD0iMTAyIiByeD0iNSIgZmlsbD0iIzAwN0FDQyIvPgo8L3N2Zz4K",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjAiIGZpbGw9IiMwMDdBQ0MiLz4KPHJlY3QgeD0iODAiIHk9IjgwIiB3aWR0aD0iMzUyIiBoZWlnaHQ9IjM1MiIgcng9IjI2IiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSIxMjAiIHk9IjEyMCIgd2lkdGg9IjI3MiIgaGVpZ2h0PSIyNzIiIHJ4PSIyMCIgZmlsbD0iIzAwN0FDQyIvPgo8L3N2Zz4K",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
